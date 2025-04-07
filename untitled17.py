@@ -10,7 +10,7 @@ st.write("Predict the car condition using Machine Learning based on various feat
 st.markdown("👩‍💻 **Made by: Namu**")
 
 # Load the dataset from uploaded path
-df = pd.read_csv('/mnt/data/car.csv')
+df = pd.read_csv(r'C:\Users\Admin\Downloads\car.csv')
 
 # Show dataset
 st.subheader("📊 Car Dataset")
