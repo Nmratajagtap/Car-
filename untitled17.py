@@ -15,6 +15,23 @@ uploaded_file = st.file_uploader("Upload your CSV file", type=['csv'])
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
     st.write(df)
+import streamlit as st
+import pandas as pd
+
+st.title("Car Data Analysis App")
+
+uploaded_file = st.file_uploader("Upload your CSV file", type=['csv'])
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    
+    st.write("Preview of data:")
+    st.write(df)
+
+    st.write("Dataset Info:")
+    buffer = df.info(buf=None)  # df.info() does not return a value directly
+    st.text(str(buffer))  # You can also just show general info
+
 
 df.info()
 
