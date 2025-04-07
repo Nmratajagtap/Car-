@@ -1,5 +1,3 @@
-# car_data_analysis_app.py
-
 import streamlit as st
 import pandas as pd
 import seaborn as sns
@@ -10,27 +8,24 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, class
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-import statsmodels.api as sm
 
+st.set_page_config(page_title="Car Data Analysis App", layout="wide")
 st.title("🚗 Car Data Analysis App")
 
-uploaded_file = st.file_uploader("Upload your Car Dataset (CSV)", type=['csv'])
+uploaded_file = st.file_uploader("📂 Upload your Car Dataset (CSV)", type=['csv'], key="car_file")
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
-    st.write("### Preview of Data")
+
+    st.subheader("🔍 Data Preview")
     st.dataframe(df.head())
 
-    st.write("### Data Types")
-    st.text(df.dtypes)
-
-    st.write("### Missing Values")
+    st.subheader("🧾 Data Types and Null Check")
+    st.write(df.dtypes)
+    st.write("Missing values:")
     st.write(df.isnull().sum())
 
-streamlit run car_data_analysis_app.py
-
-
-    # Mapping categorical columns
+    # Encode Categorical Columns
     mapping_dict = {
         'buying': {'vhigh': 0, 'high': 1, 'med': 2, 'low': 3},
         'doors': {'2': 0, '3': 1, '4': 2, '5more': 3},
@@ -44,57 +39,49 @@ streamlit run car_data_analysis_app.py
     for col, mapping in mapping_dict.items():
         df[col] = df[col].map(mapping).fillna(-1)
 
-    # Features and Target
     X = df.drop('class', axis=1)
     y = df['class']
+
+    # Split the data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Logistic Regression
-    st.write("## Logistic Regression Model")
-    log_model = LogisticRegression()
-    log_model.fit(X_train, y_train)
-    y_pred = log_model.predict(X_test)
+    # Train Logistic Regression
+    model = LogisticRegression(max_iter=200)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
 
-    st.write(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
-    st.write(f"Precision: {precision_score(y_test, y_pred, average='weighted'):.2f}")
-    st.write(f"Recall: {recall_score(y_test, y_pred, average='weighted'):.2f}")
+    st.subheader("📊 Logistic Regression Metrics")
+    st.write(f"**Accuracy**: {accuracy_score(y_test, y_pred):.2f}")
+    st.write(f"**Precision**: {precision_score(y_test, y_pred, average='weighted'):.2f}")
+    st.write(f"**Recall**: {recall_score(y_test, y_pred, average='weighted'):.2f}")
 
-    # Feature Coefficients
-    coef_df = pd.DataFrame({'Feature': X.columns, 'Coefficient': log_model.coef_[0]})
-    coef_df['AbsCoef'] = coef_df['Coefficient'].abs()
-    coef_df = coef_df.sort_values(by='AbsCoef', ascending=False)
+    st.subheader("📈 Feature Importance (Logistic Regression Coefficients)")
+    coef_df = pd.DataFrame({'Feature': X.columns, 'Coefficient': model.coef_[0]})
+    coef_df['Abs'] = coef_df['Coefficient'].abs()
+    st.dataframe(coef_df.sort_values(by='Abs', ascending=False))
 
-    st.write("### Feature Importance (Logistic Regression Coefficients)")
-    st.dataframe(coef_df[['Feature', 'Coefficient']])
-
-    # Model Comparison
-    st.write("## Model Comparison")
-
+    st.subheader("🧠 Model Comparison")
     models = {
-        "KNN": KNeighborsClassifier(),
+        "K-Nearest Neighbors": KNeighborsClassifier(),
         "Random Forest": RandomForestClassifier(random_state=42),
         "Decision Tree": DecisionTreeClassifier(random_state=42)
     }
 
-    for name, model in models.items():
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        st.write(f"### {name}")
+    for name, clf in models.items():
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+        st.markdown(f"**{name}**")
         st.text(classification_report(y_test, y_pred))
 
-    # Correlation Heatmap
-    st.write("## Correlation Heatmap")
-    plt.figure(figsize=(10, 6))
-    sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
-    st.pyplot(plt)
+    st.subheader("📌 Correlation Heatmap")
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.heatmap(df.corr(), annot=True, cmap='coolwarm', ax=ax)
+    st.pyplot(fig)
 
-    # Boxplots
-    st.write("## Boxplots of Features vs Class")
+    st.subheader("📦 Boxplots for Features vs Class")
     for col in X.columns:
-        plt.figure(figsize=(6, 4))
-        sns.boxplot(x='class', y=col, data=df)
-        plt.title(f'{col} vs Class')
-        st.pyplot(plt)
-
-
-
+        fig2, ax2 = plt.subplots(figsize=(6, 4))
+        sns.boxplot(x='class', y=col, data=df, ax=ax2)
+        st.pyplot(fig2)
+else:
+    st.warning("Please upload a CSV file to continue.")
