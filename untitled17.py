@@ -12,7 +12,7 @@ st.markdown("👩‍💻 **Made by: Namu**")
 
 try:
     # 🔽 Read the dataset from a fixed path
-    df = pd.read_csv(r'/content/car.csv')
+df = pd.read_csv(r'C:\Users\Admin\Downloads\car.csv')
     st.success("✅ File loaded successfully from /content/car.csv")
     st.dataframe(df.head())
 
