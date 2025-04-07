@@ -1,67 +1,58 @@
 import streamlit as st
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import LabelEncoder
 
-st.set_page_config(page_title="🚗 Car Evaluation Classifier", layout="centered")
-
+# App Title
 st.title("🚗 Car Evaluation Classifier using Random Forest & Streamlit")
 st.write("Predict the car condition using Machine Learning based on various features.")
-st.markdown("**👩‍💻 Made by: Namu**")
+st.markdown("👩‍💻 **Made by: Namu**")
 
-# Load dataset
-df = pd.read_csv("/mnt/data/car.csv")
+# File uploader
+uploaded_file = st.file_uploader("📁 Upload your car.csv file", type=['csv'])
 
-# Encode categorical variables
-le_dict = {}
-for column in df.columns:
-    le = LabelEncoder()
-    df[column] = le.fit_transform(df[column])
-    le_dict[column] = le
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    
+    st.subheader("🔍 Dataset Preview")
+    st.dataframe(df.head())
 
-# Split data
-X = df.drop('class', axis=1)
-y = df['class']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Encoding categorical columns if needed
+    df_encoded = df.apply(lambda col: pd.factorize(col)[0])
 
-# Train model
-model = RandomForestClassifier()
-model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
+    # Splitting data
+    X = df_encoded.iloc[:, :-1]
+    y = df_encoded.iloc[:, -1]
 
-st.success(f"✅ Model Accuracy: {accuracy * 100:.2f}%")
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-st.subheader("🔍 Predict Car Condition")
-buying = st.selectbox("Buying", le_dict['buying'].classes_)
-maint = st.selectbox("Maintenance", le_dict['maint'].classes_)
-doors = st.selectbox("Doors", le_dict['doors'].classes_)
-persons = st.selectbox("Persons", le_dict['persons'].classes_)
-lug_boot = st.selectbox("Lug Boot", le_dict['lug_boot'].classes_)
-safety = st.selectbox("Safety", le_dict['safety'].classes_)
+    # Model
+    model = RandomForestClassifier()
+    model.fit(X_train, y_train)
 
-if st.button("Predict"):
-    input_data = [[
-        le_dict['buying'].transform([buying])[0],
-        le_dict['maint'].transform([maint])[0],
-        le_dict['doors'].transform([doors])[0],
-        le_dict['persons'].transform([persons])[0],
-        le_dict['lug_boot'].transform([lug_boot])[0],
-        le_dict['safety'].transform([safety])[0]
-    ]]
+    # Accuracy
+    accuracy = model.score(X_test, y_test)
+    st.success(f"🎯 Model Accuracy: {accuracy*100:.2f}%")
 
-    input_df = pd.DataFrame(input_data, columns=X.columns)
-    prediction = model.predict(input_df)
-    predicted_class = le_dict['class'].inverse_transform(prediction)[0]
+    # Prediction UI
+    st.subheader("🧪 Predict Car Condition")
 
-    st.success(f"Predicted Car Condition: {predicted_class}")
+    input_data = []
+    for column in df.columns[:-1]:
+        value = st.selectbox(f"{column}", df[column].unique())
+        input_data.append(value)
 
-st.markdown("---")
-st.caption("Made with ❤️ by Namu")
+    # Convert input to encoded form
+    input_encoded = [pd.Series(df[column].unique()).tolist().index(val) for column, val in zip(df.columns[:-1], input_data)]
+    prediction = model.predict([input_encoded])[0]
 
+    # Decode prediction
+    decoded_label = pd.Series(df[df.columns[-1]].unique())[prediction]
+    st.success(f"✅ Predicted Condition: {decoded_label}")
 
-
+    st.markdown("❤️ **Made with love by Namu**")
+else:
+    st.warning("⚠️ Please upload the car.csv file to proceed.")
 
 
