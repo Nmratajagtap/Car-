@@ -1,53 +1,51 @@
-# car_eval_app.py
-
+# car_app_path.py
 import streamlit as st
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
-# Title and subtitle
+# 🎉 Title and Credits
 st.title("🚗 Car Evaluation Classifier using Random Forest & Streamlit")
-st.markdown("Predict the car condition using machine learning based on various features.")
+st.markdown("Predict the **car condition** using Machine Learning based on various features.")
+st.markdown("#### 👩‍💻 Made by: Namu")
 
-# Load dataset
-df = pd.read_csv('car.csv')
+# ✅ Load the dataset from your local path
+path = r"C:\Users\Admin\Downloads\car.csv"
+try:
+    df = pd.read_csv(path)
 
-# Mapping categorical features to numerical
-mapping_dict = {
-    'buying': {'vhigh': 0, 'high': 1, 'med': 2, 'low': 3},
-    'doors': {'2': 0, '3': 1, '4': 2, '5more': 3},
-    'lug_boot': {'small': 0, 'med': 1, 'big': 2},
-    'class': {'unacc': 0, 'acc': 1, 'good': 2, 'vgood': 3},
-    'maint': {'vhigh': 0, 'high': 1, 'med': 2, 'low': 3},
-    'persons': {'2': 0, '4': 1, 'more': 2},
-    'safety': {'low': 0, 'med': 1, 'high': 2}
-}
+    # Mapping categorical values
+    mapping_dict = {
+        'buying': {'vhigh': 0, 'high': 1, 'med': 2, 'low': 3},
+        'doors': {'2': 0, '3': 1, '4': 2, '5more': 3},
+        'lug_boot': {'small': 0, 'med': 1, 'big': 2},
+        'class': {'unacc': 0, 'acc': 1, 'good': 2, 'vgood': 3},
+        'maint': {'vhigh': 0, 'high': 1, 'med': 2, 'low': 3},
+        'persons': {'2': 0, '4': 1, 'more': 2},
+        'safety': {'low': 0, 'med': 1, 'high': 2}
+    }
 
-for col, mapping in mapping_dict.items():
-    df[col] = df[col].map(mapping).fillna(-1)
+    for col, mapping in mapping_dict.items():
+        df[col] = df[col].map(mapping).fillna(-1)
 
-# Split data
-X = df.drop('class', axis=1)
-y = df['class']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X = df.drop('class', axis=1)
+    y = df['class']
 
-# Train model
-best_model = RandomForestClassifier(random_state=42)
-best_model.fit(X_train, y_train)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# User input interface
-st.header("📥 Enter Car Details to Predict Class")
+    model = RandomForestClassifier(random_state=42)
+    model.fit(X_train, y_train)
 
-buying = st.selectbox("Buying Price", list(mapping_dict['buying'].keys()))
-maint = st.selectbox("Maintenance Price", list(mapping_dict['maint'].keys()))
-doors = st.selectbox("Number of Doors", list(mapping_dict['doors'].keys()))
-persons = st.selectbox("Number of Persons", list(mapping_dict['persons'].keys()))
-lug_boot = st.selectbox("Luggage Boot Size", list(mapping_dict['lug_boot'].keys()))
-safety = st.selectbox("Safety", list(mapping_dict['safety'].keys()))
+    # 🚘 Prediction Input
+    st.subheader("🔍 Predict Car Condition")
+    buying = st.selectbox("Buying Price", list(mapping_dict['buying'].keys()))
+    maint = st.selectbox("Maintenance Price", list(mapping_dict['maint'].keys()))
+    doors = st.selectbox("Number of Doors", list(mapping_dict['doors'].keys()))
+    persons = st.selectbox("Seating Capacity", list(mapping_dict['persons'].keys()))
+    lug_boot = st.selectbox("Luggage Boot Size", list(mapping_dict['lug_boot'].keys()))
+    safety = st.selectbox("Safety Level", list(mapping_dict['safety'].keys()))
 
-# Prediction
-if st.button("Predict"):
     input_data = pd.DataFrame({
         'buying': [mapping_dict['buying'][buying]],
         'maint': [mapping_dict['maint'][maint]],
@@ -57,16 +55,20 @@ if st.button("Predict"):
         'safety': [mapping_dict['safety'][safety]]
     })
 
-    prediction = best_model.predict(input_data)[0]
-    class_reverse_mapping = {v: k for k, v in mapping_dict['class'].items()}
-    st.success(f"✅ Predicted Car Class: **{class_reverse_mapping[prediction]}**")
+    if st.button("Predict"):
+        pred = model.predict(input_data)[0]
+        class_names = {v: k for k, v in mapping_dict['class'].items()}
+        st.success(f"🚘 Predicted Car Class: **{class_names[pred]}**")
 
-    # Optional: show performance of model
-    y_pred = best_model.predict(X_test)
-    st.subheader("📊 Model Performance on Test Set")
-    st.text(classification_report(y_test, y_pred))
+        # 📋 Evaluation
+        y_pred = model.predict(X_test)
+        st.subheader("📋 Classification Report")
+        st.text(classification_report(y_test, y_pred))
+
+except FileNotFoundError:
+    st.error("❌ File not found. Please check the path: " + path)
 
 # Footer
 st.markdown("---")
-st.markdown("#### 👩‍💻 Made with ❤️ by **Namu**")
+st.markdown("Made with ❤️ by **Namu**")
 
