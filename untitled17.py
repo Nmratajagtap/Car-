@@ -10,12 +10,10 @@ st.title("🚗 Car Evaluation Classifier using Random Forest & Streamlit")
 st.write("Predict the car condition using Machine Learning based on various features.")
 st.markdown("👩‍💻 **Made by: Namu**")
 
-# 📂 Upload CSV file
-uploaded_file = st.file_uploader("Upload your car.csv file", type=["csv"])
-
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
-    st.success("✅ File uploaded successfully!")
+try:
+    # 🔽 Read the dataset from a fixed path
+    df = pd.read_csv(r'/content/car.csv')
+    st.success("✅ File loaded successfully from /content/car.csv")
     st.dataframe(df.head())
 
     # 🎯 Encode categorical variables
@@ -53,8 +51,9 @@ if uploaded_file is not None:
     st.markdown("---")
     st.markdown("Made with ❤️ by **Namu**")
 
-else:
-    st.warning("📁 Please upload your 'car.csv' file to begin.")
+except FileNotFoundError:
+    st.error("❌ File not found. Please make sure the path '/content/car.csv' is correct.")
+
 
 
 
