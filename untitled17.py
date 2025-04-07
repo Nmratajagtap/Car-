@@ -14,11 +14,6 @@ uploaded_file = st.file_uploader("Upload your car.csv file", type=['csv'])
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
 
-# ✅ Load the dataset from your local path
-path = r"C:\Users\Admin\Downloads\car.csv"
-try:
-    df = pd.read_csv(path)
-
     # Mapping categorical values
     mapping_dict = {
         'buying': {'vhigh': 0, 'high': 1, 'med': 2, 'low': 3},
