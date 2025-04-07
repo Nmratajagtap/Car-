@@ -54,6 +54,9 @@ if uploaded_file is not None:
     plt.figure(figsize=(6, 4))
     sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
     st.pyplot(plt)
+#Accuracy
+    st.success(f"✅ Model Accuracy: {accuracy:.2%}")
+
 
     # Feature Importance
     st.subheader("💡 Feature Importance")
