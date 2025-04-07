@@ -10,13 +10,9 @@ Original file is located at
 import streamlit as st
 import pandas as pd
 
-uploaded_file = st.file_uploader("Upload your CSV file", type=['csv'])
+uploaded_file1 = st.file_uploader("Upload Car CSV", type=['csv'], key="car_file")
+uploaded_file2 = st.file_uploader("Upload Owner CSV", type=['csv'], key="owner_file")
 
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
-    st.write(df)
-import streamlit as st
-import pandas as pd
 
 st.title("Car Data Analysis App")
 
