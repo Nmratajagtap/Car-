@@ -11,8 +11,16 @@ st.markdown("Predict the **car condition** using Machine Learning based on vario
 st.markdown("#### 👩‍💻 Made by: Namu")
 uploaded_file = st.file_uploader("Upload your car.csv file", type=['csv'])
 
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
+uploaded_file = st.file_uploader("Upload car.csv", type=['csv'])
+
+try:
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+    else:
+        df = pd.read_csv(r"C:\Users\Admin\Downloads\car.csv")  # Fallback for local run
+except FileNotFoundError:
+    st.error("❌ File not found. Please check the path or upload the file manually.")
+
 
     # Mapping categorical values
     mapping_dict = {
