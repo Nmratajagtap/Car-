@@ -7,9 +7,14 @@ Original file is located at
     https://colab.research.google.com/drive/1rbQxGiJMiREJWcORZzm6lflkFzl_kDZv
 """
 
+import streamlit as st
 import pandas as pd
 
-df = pd.read_csv(r'/content/car.csv')
+uploaded_file = st.file_uploader("Upload your CSV file", type=['csv'])
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    st.write(df)
 
 df.info()
 
