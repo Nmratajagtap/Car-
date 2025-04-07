@@ -9,6 +9,10 @@ from sklearn.metrics import classification_report
 st.title("🚗 Car Evaluation Classifier using Random Forest & Streamlit")
 st.markdown("Predict the **car condition** using Machine Learning based on various features.")
 st.markdown("#### 👩‍💻 Made by: Namu")
+uploaded_file = st.file_uploader("Upload your car.csv file", type=['csv'])
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
 
 # ✅ Load the dataset from your local path
 path = r"C:\Users\Admin\Downloads\car.csv"
