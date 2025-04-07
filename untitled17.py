@@ -58,6 +58,5 @@ st.markdown("---")
 st.markdown("Made with ❤️ by **Namu**")
 
 
-else:
-    st.warning("⚠️ Please upload a valid `car.csv` file to proceed.")
+
 
