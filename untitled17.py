@@ -9,17 +9,15 @@ from sklearn.metrics import classification_report
 st.title("🚗 Car Evaluation Classifier using Random Forest & Streamlit")
 st.markdown("Predict the **car condition** using Machine Learning based on various features.")
 st.markdown("#### 👩‍💻 Made by: Namu")
-uploaded_file = st.file_uploader("Upload your car.csv file", type=['csv'])
-
-uploaded_file = st.file_uploader("Upload car.csv", type=['csv'])
-
 try:
+    uploaded_file = st.file_uploader("Upload car.csv", type=['csv'])
+
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
     else:
-        df = pd.read_csv(r"C:\Users\Admin\Downloads\car.csv")  # Fallback for local run
+        df = pd.read_csv(r"C:\Users\Admin\Downloads\car.csv")
 except FileNotFoundError:
-    st.error("❌ File not found. Please check the path or upload the file manually.")
+    st.error("❌ File not found. Please check the path or upload the file.")
 
 
     # Mapping categorical values
