@@ -27,6 +27,9 @@ if uploaded_file is not None:
     st.write("### Missing Values")
     st.write(df.isnull().sum())
 
+streamlit run car_data_analysis_app.py
+
+
     # Mapping categorical columns
     mapping_dict = {
         'buying': {'vhigh': 0, 'high': 1, 'med': 2, 'low': 3},
