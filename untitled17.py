@@ -1,52 +1,72 @@
+# car_eval_app.py
+
 import streamlit as st
-from sklearn import datasets
-from sklearn.linear_model import LogisticRegression
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
 
-# Sidebar
-st.sidebar.title("🌸 Iris Classifier")
-st.sidebar.markdown("**Made by Namu 😀**")
-
-# Title and info
-st.title("Iris Flower Classification App 🌼")
-st.markdown("""
-This app uses **Multinomial Logistic Regression (Softmax)** trained on the Iris dataset  
-to classify iris flowers into three species: **Setosa, Versicolor, and Virginica.**  
-**Made by Namu 😀**
-""")
+# Title and subtitle
+st.title("🚗 Car Evaluation Classifier using Random Forest & Streamlit")
+st.markdown("Predict the car condition using machine learning based on various features.")
 
 # Load dataset
-iris = datasets.load_iris()
-X = iris.data
-y = iris.target
-target_names = iris.target_names
+df = pd.read_csv('car.csv')
+
+# Mapping categorical features to numerical
+mapping_dict = {
+    'buying': {'vhigh': 0, 'high': 1, 'med': 2, 'low': 3},
+    'doors': {'2': 0, '3': 1, '4': 2, '5more': 3},
+    'lug_boot': {'small': 0, 'med': 1, 'big': 2},
+    'class': {'unacc': 0, 'acc': 1, 'good': 2, 'vgood': 3},
+    'maint': {'vhigh': 0, 'high': 1, 'med': 2, 'low': 3},
+    'persons': {'2': 0, '4': 1, 'more': 2},
+    'safety': {'low': 0, 'med': 1, 'high': 2}
+}
+
+for col, mapping in mapping_dict.items():
+    df[col] = df[col].map(mapping).fillna(-1)
+
+# Split data
+X = df.drop('class', axis=1)
+y = df['class']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Train model
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-model = LogisticRegression(multi_class='multinomial', solver='lbfgs', max_iter=200)
-model.fit(X_train, y_train)
+best_model = RandomForestClassifier(random_state=42)
+best_model.fit(X_train, y_train)
 
-# Accuracy
-y_pred = model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
-st.subheader("Model Accuracy")
-st.write(f"✅ Accuracy: **{accuracy * 100:.2f}%**")
+# User input interface
+st.header("📥 Enter Car Details to Predict Class")
 
-# Input sliders
-st.subheader("Predict Flower Type")
-sepal_length = st.slider("Sepal Length (cm)", float(X[:, 0].min()), float(X[:, 0].max()))
-sepal_width = st.slider("Sepal Width (cm)", float(X[:, 1].min()), float(X[:, 1].max()))
-petal_length = st.slider("Petal Length (cm)", float(X[:, 2].min()), float(X[:, 2].max()))
-petal_width = st.slider("Petal Width (cm)", float(X[:, 3].min()), float(X[:, 3].max()))
+buying = st.selectbox("Buying Price", list(mapping_dict['buying'].keys()))
+maint = st.selectbox("Maintenance Price", list(mapping_dict['maint'].keys()))
+doors = st.selectbox("Number of Doors", list(mapping_dict['doors'].keys()))
+persons = st.selectbox("Number of Persons", list(mapping_dict['persons'].keys()))
+lug_boot = st.selectbox("Luggage Boot Size", list(mapping_dict['lug_boot'].keys()))
+safety = st.selectbox("Safety", list(mapping_dict['safety'].keys()))
 
-# Prediction button
-if st.button("🔍 Predict Flower Species"):
-    input_data = [[sepal_length, sepal_width, petal_length, petal_width]]
-    prediction = model.predict(input_data)[0]
-    prediction_name = target_names[prediction]
-    st.success(f"🌸 The predicted Iris species is: **{prediction_name}**")
+# Prediction
+if st.button("Predict"):
+    input_data = pd.DataFrame({
+        'buying': [mapping_dict['buying'][buying]],
+        'maint': [mapping_dict['maint'][maint]],
+        'doors': [mapping_dict['doors'][doors]],
+        'persons': [mapping_dict['persons'][persons]],
+        'lug_boot': [mapping_dict['lug_boot'][lug_boot]],
+        'safety': [mapping_dict['safety'][safety]]
+    })
+
+    prediction = best_model.predict(input_data)[0]
+    class_reverse_mapping = {v: k for k, v in mapping_dict['class'].items()}
+    st.success(f"✅ Predicted Car Class: **{class_reverse_mapping[prediction]}**")
+
+    # Optional: show performance of model
+    y_pred = best_model.predict(X_test)
+    st.subheader("📊 Model Performance on Test Set")
+    st.text(classification_report(y_test, y_pred))
 
 # Footer
 st.markdown("---")
-st.markdown("Made with ❤️ by **Namu**")
+st.markdown("#### 👩‍💻 Made with ❤️ by **Namu**")
+
